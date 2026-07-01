@@ -17,5 +17,7 @@ func setupFlags() {
 func main() {
 	setupFlags()
 	log.Println("starting gredis")
-	server.RunSyncTCPServer()
+	if err := server.RunAsyncTCPServer(); err != nil {
+		log.Fatal(err)
+	}
 }
