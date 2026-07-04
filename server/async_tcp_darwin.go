@@ -4,12 +4,15 @@ import (
 	"log"
 	"net"
 	"syscall"
+	"time"
 
 	"github.com/SanjayM-2002/gredis/config"
 	"github.com/SanjayM-2002/gredis/core"
 )
 
 var con_clients int = 0
+var cronFrequency time.Duration = 1 * time.Second
+var lastCronExecTime time.Time = time.Now()
 
 func RunAsyncTCPServer() error {
 	log.Println("starting an asynchronous TCP server (kqueue) on", config.Host, config.Port)
@@ -72,6 +75,11 @@ func RunAsyncTCPServer() error {
 	}
 
 	for {
+		if time.Now().After(lastCronExecTime.Add(cronFrequency)) {
+			core.DeleteExpiredKeys()
+			lastCronExecTime = time.Now()
+		}
+
 		// see if any FD is ready for an IO
 		// (Kevent with no change list and an event list waits; nil timeout = wait forever)
 		nevents, e := syscall.Kevent(kqFD, nil, events[:], nil)
