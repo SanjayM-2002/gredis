@@ -1,2 +1,3 @@
 bin/gredis
 .DS_Store
+*.aof
